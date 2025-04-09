@@ -22,7 +22,11 @@ export class EventProcessor {
 
         this.sock.ev.on("messages.upsert", async ({ messages, type }) => {
             await this.eventHandler.trigger("message", [messages, type]);
-        }) 
+        })
+
+        this.sock.ev.on("connection.update", async (update) => {
+            await this.eventHandler.trigger("connection", update);
+        });
     
     }
 

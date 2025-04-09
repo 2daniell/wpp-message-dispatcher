@@ -3,6 +3,7 @@ import { CommandProcessor } from "../command/CommandProcessor";
 import { EventProcessor } from "../event/EventProcessor";
 import { Bot } from "../bot/Bot";
 import { MessageListener } from "../event/events/MessageListener";
+import { ConnectionListener } from "../event/events/ConnectionListener";
 
 export class BotHandler {
 
@@ -15,8 +16,9 @@ export class BotHandler {
 
         this.commandProcessor = new CommandProcessor(this.bot.getSock());
         this.eventProcessor = new EventProcessor(this.bot.getSock());
-
+        
         this.eventProcessor.register("message", new MessageListener(bot))
+        this.eventProcessor.register("connection", new ConnectionListener(bot));
     }
 
     public getCMDProcessor(): CommandProcessor {
