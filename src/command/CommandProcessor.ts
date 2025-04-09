@@ -1,10 +1,12 @@
 import { WAMessage, WASocket } from "baileys";
 import { Logger } from "../util/Logger";
 import { CommandExecutor } from "./CommandExecutor";
+import PQueue from "p-queue";
 
 export class CommandProcessor {
 
     private static commands: Map<string, CommandExecutor> = new Map();
+    private commandQueue: PQueue = new PQueue({ concurrency: 1 })
     private logger: Logger
     private sock: WASocket;
 
@@ -17,7 +19,11 @@ export class CommandProcessor {
         this.commands.set(command, executor);
     }
 
-    public async process(message: WAMessage) {
+    public async addCommandQueue(message: WAMessage) {
+        this.commandQueue.add(async () => await this.processCommand(message))
+    }
+
+    private async processCommand(message: WAMessage) {
         try {
 
             if (message.key.fromMe) return
