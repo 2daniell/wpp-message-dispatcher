@@ -26,6 +26,20 @@ export class ConnectionListener implements Listener<any> {
             }
         } else if (connection === "open") {
             console.log("✅ Bot conectado e pronto!");
+
+            const groupsMap = await this.bot.getSock().groupFetchAllParticipating();
+            
+            const groups = Object.values(groupsMap).filter(group =>
+            group.announce !== true &&
+            group.size > 1 &&
+            group.isCommunityAnnounce !== true &&
+            group.subject.trim() !== Bot.ALLOWED_GROUP && group.subject.trim().startsWith("Testingbot")
+            );
+
+            this.bot.setGroups(groups);
+
+            console.log("Grupos encontrados: " + this.bot.getGroups().length);
+
         } else if (connection === "connecting") {
             console.log("Conectando...");
         }

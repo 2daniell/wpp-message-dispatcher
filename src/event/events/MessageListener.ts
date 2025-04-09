@@ -14,11 +14,11 @@ export class MessageListener implements Listener<any[]> {
         if (type !== "notify") return;
 
         for (const message of messages) {
-
+            
             if (message.key.fromMe) continue;
-
+            
             const jid = message.key.remoteJid;
-
+            
             const isGroup = jid?.endsWith("@g.us");
             if (!isGroup) continue;
 
@@ -28,9 +28,15 @@ export class MessageListener implements Listener<any[]> {
             if (groupName.trim() !== Bot.ALLOWED_GROUP) continue
 
             const mentions = message.message?.extendedTextMessage?.contextInfo?.mentionedJid;
-            const botJid = this.bot.getSock().user?.id;
+            const botJid = this.bot.getSock().user.id;
 
-            if (!mentions?.includes(botJid!)) continue;
+            const botPhoneNumber = botJid?.split(':')[0];
+            const mentionedBot = mentions?.some(mention => {
+                const mentionPhoneNumber = mention.replace(/[^0-9]/g, '');
+                return mentionPhoneNumber === botPhoneNumber;
+            });
+
+            if (!mentionedBot) continue;
 
             this.bot.getHandler().getCMDProcessor().addCommandQueue(message);
             
