@@ -1,17 +1,26 @@
 import { WASocket } from "baileys";
 import { CommandProcessor } from "../command/CommandProcessor";
 import { EventProcessor } from "../event/EventProcessor";
-import { Logger } from "../util/Logger";
+import { Bot } from "../bot/Bot";
+import { MessageListener } from "../event/events/MessageListener";
 
 export class BotHandler {
 
-    private sock: WASocket
-    private logger: Logger;
+    private bot: Bot;
     private commandProcessor: CommandProcessor;
     private eventProcessor: EventProcessor;
 
-    public constructor(sock: WASocket, logger: Logger) {
-        this.sock = sock;
+    public constructor(bot: Bot) {
+        this.bot = bot
+
+        this.commandProcessor = new CommandProcessor(this.bot.getSock());
+        this.eventProcessor = new EventProcessor(this.bot.getSock());
+
+        this.eventProcessor.register("message", new MessageListener(bot))
+    }
+
+    public getCMDProcessor(): CommandProcessor {
+        return this.commandProcessor;
     }
 
 }

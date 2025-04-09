@@ -1,5 +1,4 @@
 import { WAMessage, WASocket } from "baileys";
-import { Logger } from "../util/Logger";
 import { CommandExecutor } from "./CommandExecutor";
 import PQueue from "p-queue";
 
@@ -7,11 +6,9 @@ export class CommandProcessor {
 
     private static commands: Map<string, CommandExecutor> = new Map();
     private commandQueue: PQueue = new PQueue({ concurrency: 1 })
-    private logger: Logger
     private sock: WASocket;
 
-    public constructor(logger: Logger, sock: WASocket) {
-        this.logger = logger;
+    public constructor(sock: WASocket) {
         this.sock = sock;
     }
 
@@ -45,7 +42,7 @@ export class CommandProcessor {
                     try {
                         await executor.execute(message);
                     } catch(err) {
-                        this.logger.error(`Ocorreu um erro ao processar comando(err2) ${err}`)
+                        console.log(err)
                     }
                 }
             } else {
@@ -54,7 +51,7 @@ export class CommandProcessor {
                 })
             }
         } catch(err) {
-            this.logger.error(`Ocorreu um erro ao processar comando(err1) ${err}`)
+            console.log(err)
         }
     }
 

@@ -10,6 +10,8 @@ export class EventProcessor {
     public constructor(sock: WASocket) {
         this.sock = sock;
         this.eventHandler = new EventHandler();
+
+        this.init()
     }
 
     public register(event: string, listener: Listener<any>) {

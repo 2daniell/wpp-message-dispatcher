@@ -1,1 +1,4 @@
-console.log("Hello World")
+import { Bot } from "./bot/Bot";
+
+const bot = new Bot("testeinstance")
+bot.start()

@@ -1,35 +1,55 @@
-import makeWASocket, { useMultiFileAuthState, WASocket } from "baileys";
-import { Logger } from "../util/Logger";
+import makeWASocket, { DisconnectReason, WASocket } from "baileys";
 import path from 'path'
 import { BotHandler } from "../core/BotHandler";
+import { Boom } from '@hapi/boom'
+import Pino from 'pino'
+import { useSQLiteAuth } from "../auth/SQLiteAuth";
 
 export class Bot {
 
+    public static ALLOWED_GROUP: string = "Compartilha NT"
+
     private instanceName: string;
-    private sessionPath: string;
     private sock?: WASocket
     private handler?: BotHandler
-    private logger: Logger
 
-    public constructor(instanceName: string, basePath: string) {
+    public constructor(instanceName: string) {
         this.instanceName = instanceName;
-        this.sessionPath = path.join(basePath, 'sessions', instanceName)
-        this.logger = new Logger(instanceName, basePath)
     }
 
     public async start() {
 
-        const { state, saveCreds } = await useMultiFileAuthState(this.sessionPath);
+        const { state, saveCreds } = await useSQLiteAuth(this.instanceName)
 
         this.sock = makeWASocket({
             auth: state,
             printQRInTerminal: true,
-            browser: ['Windows', 'Chrome', '110.0.5481.100']
+            browser: ['Windows', 'Chrome', '110.0.5481.100'],
         })
 
-        this.handler = new BotHandler(this.sock, this.logger);
+        this.sock.ev.on('creds.update', saveCreds);
+
+        this.sock.ev.on('connection.update', (update) => {
+            const { connection, lastDisconnect } = update 
+            if(connection === 'close') { 
+                if((lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut) { 
+                    this.start() 
+                } else { 
+                    console.log('Connection closed. You are logged out.') 
+                } 
+            } 
+        })
+          
+        this.handler = new BotHandler(this);
     }
 
+    public getSock(): WASocket {
+        return this.sock;
+    }
+    
+    public getHandler(): BotHandler {
+        return this.handler;
+    }
 
 
 }
