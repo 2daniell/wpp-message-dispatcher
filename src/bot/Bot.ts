@@ -7,11 +7,9 @@ export class Bot {
 
     private instanceName: string;
     private sessionPath: string;
-
     private sock?: WASocket
     private handler?: BotHandler
-
-    public logger: Logger
+    private logger: Logger
 
     public constructor(instanceName: string, basePath: string) {
         this.instanceName = instanceName;
@@ -29,8 +27,7 @@ export class Bot {
             browser: ['Windows', 'Chrome', '110.0.5481.100']
         })
 
-        this.handler = new BotHandler(this.sock);
-        
+        this.handler = new BotHandler(this.sock, this.logger);
     }
 
 
