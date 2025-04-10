@@ -36,7 +36,7 @@ export class ConnectionListener implements Listener<any> {
             group.announce !== true &&
             group.size > 1 &&
             group.isCommunityAnnounce !== true &&
-            group.subject.trim() !== Bot.ALLOWED_GROUP && group.subject.trim().startsWith("Testingbot")
+            group.subject.trim() !== Bot.ALLOWED_GROUP
             );
 
             this.bot.setGroups(groups);
