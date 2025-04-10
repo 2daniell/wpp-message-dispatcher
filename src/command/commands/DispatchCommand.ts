@@ -1,7 +1,7 @@
 import { WAMessage, WAMessageContent } from "baileys";
+import { CommandExecutor } from "../CommandExecutor";
 import { Bot } from "../../bot/Bot";
 import sleep from "../../util/Sleep";
-import { CommandExecutor } from "../../command/CommandExecutor";
 
 export class DispatchCommand implements CommandExecutor {
 
@@ -29,42 +29,41 @@ export class DispatchCommand implements CommandExecutor {
 
         const totalGroups = this.bot.getGroups().length;
 
-
-        const maxTime = 30 * 60 * 1000;
-        const maxGroups = 600;
-
-
-        const timePerGroup = (totalGroups <= maxGroups)
-            ? maxTime / maxGroups
-            : (totalGroups / maxGroups) * maxTime;
-
-        const pauseDuration = Math.max(timePerGroup / 1000, 1000);
         let counter = 0;
 
         console.log(`Total de grupos: ${totalGroups}`);
-        console.log(`Pausa entre mensagens: ${pauseDuration / 1000} segundos`);
 
+        const batchDelay = 2 * 60 * 1000;
         const batchSize = 100;
-        const delayBetweenBatches = 5 * 60 * 1000;
+        const totalBatches = Math.ceil(totalGroups / batchSize);
 
-        for (let i = 0; i < totalGroups; i += batchSize) {
-            const batch = this.bot.getGroups().slice(i, i + batchSize);
-            for (const group of batch) {
+        for (let batch = 0; batch < totalBatches; batch++) {
+            const startGroup = batch * batchSize;
+            const endGroup = Math.min((batch + 1) * batchSize, totalGroups);
+            console.log(`Enviando batch ${batch + 1} de ${totalBatches}...`);
+
+            for (let i = startGroup; i < endGroup; i++) {
+
+                const randomDelay = Math.random() * (4 - 1) + 1;
+                const group = this.bot.getGroups()[i];
+                
                 try {
                     await this.bot.getSock().sendMessage(group.id!, { forward: { key: key, message: msg } });
                     console.log(`Mensagem enviada para: ${group.subject}`);
                 } catch (error) {
                     console.error(`Erro ao enviar para o grupo: ${group.subject}`, error);
                 }
-
+                
                 counter++;
                 console.log(`Grupos restantes: ${totalGroups - counter}`);
-
-                await sleep(pauseDuration);
+                await sleep(randomDelay * 1000);
+                
             }
 
-            console.log(`Aguardando ${delayBetweenBatches / 1000 / 60} minutos antes de enviar o próximo lote.`);
-            await sleep(delayBetweenBatches);
+            if (batch < totalBatches - 1) {
+                console.log(`Aguardando ${batchDelay / 1000 / 60} minutos antes de começar o próximo batch...`);
+                await sleep(batchDelay);
+            }
         }
 
         await sleep(1000 * 5);
