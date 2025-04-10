@@ -3,12 +3,14 @@ import path from 'path'
 import { BotHandler } from "../core/BotHandler";
 import Pino from 'pino'
 import { useSQLiteAuth } from "../auth/SQLiteAuth";
+import { BotStatus } from "./BotStatus";
 
 export class Bot {
 
-    public static ALLOWED_GROUP: string = "Testingbot A" //"Compartilha NT"
+    public static ALLOWED_GROUP: string = "Compartilha NT"
 
     private instanceName: string;
+    private status: BotStatus;
     private sock?: WASocket
     private handler?: BotHandler
     private groups: GroupMetadata[] = [];
@@ -19,10 +21,12 @@ export class Bot {
 
     public async start() {
 
+        this.status = BotStatus.STARTING
+
         const { state, saveCreds } = await useSQLiteAuth(this.instanceName)
 
         const logger = Pino({
-            level: 'error'
+            level: "silent"
           });
 
         this.sock = makeWASocket({
@@ -53,5 +57,12 @@ export class Bot {
         this.groups = groups;
     }
 
+    public getStatus(): BotStatus {
+        return this.status;
+    }
+
+    public setStatus(status: BotStatus): void {
+        this.status = status;
+    }
 
 }

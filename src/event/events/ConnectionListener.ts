@@ -2,6 +2,8 @@ import { ConnectionState, DisconnectReason } from "baileys";
 import { Bot } from "../../bot/Bot";
 import { Listener } from "../Listener";
 import { Boom } from "@hapi/boom";
+import sleep from "../../util/Sleep";
+import { BotStatus } from "../../bot/BotStatus";
 
 export class ConnectionListener implements Listener<any> {
 
@@ -25,7 +27,8 @@ export class ConnectionListener implements Listener<any> {
                 console.log("Conexão fechada. Você esta deslogado!");
             }
         } else if (connection === "open") {
-            console.log("✅ Bot conectado e pronto!");
+            
+            await sleep(1000 * 60 * 5)
 
             const groupsMap = await this.bot.getSock().groupFetchAllParticipating();
             
@@ -37,11 +40,15 @@ export class ConnectionListener implements Listener<any> {
             );
 
             this.bot.setGroups(groups);
-
+            
             console.log("Grupos encontrados: " + this.bot.getGroups().length);
+            console.log("✅ Bot conectado e pronto!");
+
+            this.bot.setStatus(BotStatus.READY)
 
         } else if (connection === "connecting") {
             console.log("Conectando...");
+            console.log("Aguarde até que o processamento esteja concluido, esse processo demora 5 minutos!");
         }
 
     }

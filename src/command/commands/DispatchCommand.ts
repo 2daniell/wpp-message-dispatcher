@@ -1,7 +1,7 @@
 import { WAMessage, WAMessageContent } from "baileys";
-import { CommandExecutor } from "../CommandExecutor";
 import { Bot } from "../../bot/Bot";
 import sleep from "../../util/Sleep";
+import { CommandExecutor } from "../../command/CommandExecutor";
 
 export class DispatchCommand implements CommandExecutor {
 
@@ -19,37 +19,56 @@ export class DispatchCommand implements CommandExecutor {
         const msg = quotedMessage as WAMessageContent;
 
         if (!quotedMessage) {
-            this.bot.getSock().sendMessage(message.key.remoteJid!, { text: "❌ Não foi possivel encontrar uma mensagem mencionada!" }, { quoted: message})
-            return
+            this.bot.getSock().sendMessage(message.key.remoteJid!, { text: "❌ Não foi possível encontrar uma mensagem mencionada!" }, { quoted: message });
+            return;
         }
 
-        await this.bot.getSock().sendMessage(message.key.remoteJid!, { text: "✅ Iniciando processo de envio!" }, { quoted: message})
+        await this.bot.getSock().sendMessage(message.key.remoteJid!, { text: "✅ Iniciando processo de envio!\n*Aguarde até que o processamento seja concluído*" }, { quoted: message });
 
-        await sleep(1000 * 3)
+        await sleep(1000 * 3);
 
-        const totalMessages = this.bot.getGroups().length
-        let pauseDuration = 0;
+        const totalGroups = this.bot.getGroups().length;
 
-    
-        if (totalMessages < 200) {
-            pauseDuration = 600 / totalMessages * 1000;
-        } else if (totalMessages >= 200 && totalMessages < 600) {
-            pauseDuration = 1200 / totalMessages * 1000;
-        } else if (totalMessages  >= 600) {
-            pauseDuration = 1800 / totalMessages * 1000;
-        }
 
-        for (const group of this.bot.getGroups()) {
-            await this.bot.getSock().sendMessage(group.id!, { forward: {
-                key: key,
-                message: msg
-            }})
+        const maxTime = 30 * 60 * 1000;
+        const maxGroups = 600;
 
-            console.log(`Mensagem enviada para: ${group.subject}`)
-            await sleep(pauseDuration);
+
+        const timePerGroup = (totalGroups <= maxGroups)
+            ? maxTime / maxGroups
+            : (totalGroups / maxGroups) * maxTime;
+
+        const pauseDuration = Math.max(timePerGroup / 1000, 1000);
+        let counter = 0;
+
+        console.log(`Total de grupos: ${totalGroups}`);
+        console.log(`Pausa entre mensagens: ${pauseDuration / 1000} segundos`);
+
+        const batchSize = 100;
+        const delayBetweenBatches = 5 * 60 * 1000;
+
+        for (let i = 0; i < totalGroups; i += batchSize) {
+            const batch = this.bot.getGroups().slice(i, i + batchSize);
+            for (const group of batch) {
+                try {
+                    await this.bot.getSock().sendMessage(group.id!, { forward: { key: key, message: msg } });
+                    console.log(`Mensagem enviada para: ${group.subject}`);
+                } catch (error) {
+                    console.error(`Erro ao enviar para o grupo: ${group.subject}`, error);
+                }
+
+                counter++;
+                console.log(`Grupos restantes: ${totalGroups - counter}`);
+
+                await sleep(pauseDuration);
+            }
+
+            console.log(`Aguardando ${delayBetweenBatches / 1000 / 60} minutos antes de enviar o próximo lote.`);
+            await sleep(delayBetweenBatches);
         }
 
         await sleep(1000 * 5);
-        this.bot.getSock().sendMessage(message.key.remoteJid!, { text: "✅ Envio concuido com sucesso!" }, { quoted: message})
+        console.log("Envio finalizado com sucesso!");
+        this.bot.getSock().sendMessage(message.key.remoteJid!, { text: "✅ Envio concluído com sucesso!" }, { quoted: message });
     }
 }

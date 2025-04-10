@@ -21,11 +21,19 @@ export class EventProcessor {
     private init() {
 
         this.sock.ev.on("messages.upsert", async ({ messages, type }) => {
-            await this.eventHandler.trigger("message", [messages, type]);
+            try {
+                await this.eventHandler.trigger("message", [messages, type]);
+            } catch(err) {
+                console.error("Erro (1)")
+            }
         })
 
         this.sock.ev.on("connection.update", async (update) => {
-            await this.eventHandler.trigger("connection", update);
+            try {
+                await this.eventHandler.trigger("connection", update);
+            } catch(err) {
+                console.error("Erro (2)")
+            }
         });
     
     }

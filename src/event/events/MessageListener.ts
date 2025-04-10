@@ -1,6 +1,7 @@
 import { MessageUpsertType, WAMessage, WASocket } from "baileys";
 import { Listener } from "../Listener";
 import { Bot } from "../../bot/Bot";
+import { BotStatus } from "../../bot/BotStatus";
 
 export class MessageListener implements Listener<any[]> {
 
@@ -11,7 +12,7 @@ export class MessageListener implements Listener<any[]> {
     }
 
     public async handle([messages, type]: [WAMessage[], MessageUpsertType]): Promise<void> {
-        if (type !== "notify") return;
+        if (type !== "notify" || this.bot.getStatus() === BotStatus.STARTING) return;
 
         for (const message of messages) {
             

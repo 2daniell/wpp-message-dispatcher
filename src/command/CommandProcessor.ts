@@ -40,6 +40,7 @@ export class CommandProcessor {
 
                 if (executor) {
                     try {
+                        console.log(`Comando ${commandName.toUpperCase()} adicionado sendo executado!`)
                         await executor.execute(message);
                     } catch(err) {
                         console.log(err)

@@ -3,7 +3,7 @@ import { CommandProcessor } from "../command/CommandProcessor";
 import { EventProcessor } from "../event/EventProcessor";
 import { Bot } from "../bot/Bot";
 import { MessageListener } from "../event/events/MessageListener";
-import { ConnectionListener } from "../event/events/ConnectionListener";
+import { ConnectionListener } from "../event/events/ConnectionListener"
 import { StatusCommand } from "../command/commands/StatusCommand";
 import { DispatchCommand } from "../command/commands/DispatchCommand";
 
