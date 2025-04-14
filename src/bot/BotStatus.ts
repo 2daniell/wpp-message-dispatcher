@@ -1,4 +1,6 @@
 export enum BotStatus {
+    STOPPED,
     STARTING,
-    READY
+    READY,
+    FAIL
 }

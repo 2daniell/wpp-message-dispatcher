@@ -4,8 +4,9 @@ import { BotHandler } from "../core/BotHandler";
 import Pino from 'pino'
 import { useSQLiteAuth } from "../auth/SQLiteAuth";
 import { BotStatus } from "./BotStatus";
+import EventEmitter from "events";
 
-export class Bot {
+export class Bot extends EventEmitter {
 
     public static ALLOWED_GROUP: string = "Compartilha NT"
 
@@ -15,8 +16,15 @@ export class Bot {
     private handler?: BotHandler
     private groups: GroupMetadata[] = [];
 
-    public constructor(instanceName: string) {
+    public qrCallback: (qr: string) => void;
+    public readyCallback: () => void;
+
+    public constructor(instanceName: string, onQr?: (qr: string) => void, onReady?: () => void) {
+        super()
         this.instanceName = instanceName;
+        this.qrCallback = onQr;
+        this.readyCallback = onReady;
+        this.status = BotStatus.STOPPED;
     }
 
     public async start() {
@@ -31,7 +39,7 @@ export class Bot {
 
         this.sock = makeWASocket({
             auth: state,
-            printQRInTerminal: true,
+            printQRInTerminal: false,
             logger: logger,
             browser: ['Windows', 'Chrome', '110.0.5481.100'],
         })
@@ -63,6 +71,10 @@ export class Bot {
 
     public setStatus(status: BotStatus): void {
         this.status = status;
+        this.emit("statusChanged", status)
     }
 
+    public getInstanceName(): string {
+        return this.instanceName;
+    }
 }
