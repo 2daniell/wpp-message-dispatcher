@@ -72,7 +72,6 @@ export async function useSQLiteAuth(sessionId: string) {
           return result;
         },
         set: async (data: Record<string, Record<string, any>>) => {
-          await run('BEGIN TRANSACTION');
           for (const type in data) {
             for (const id in data[type]) {
               const value = JSON.stringify(data[type][id], BufferJSON.replacer);
@@ -82,7 +81,6 @@ export async function useSQLiteAuth(sessionId: string) {
               );
             }
           }
-          await run('COMMIT');
         }
       }
     },

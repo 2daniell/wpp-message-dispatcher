@@ -4,7 +4,7 @@ import PQueue from "p-queue";
 
 export class CommandProcessor {
 
-    private static commands: Map<string, CommandExecutor> = new Map();
+    private commands: Map<string, CommandExecutor> = new Map();
     private commandQueue: PQueue = new PQueue({ concurrency: 1 })
     private sock: WASocket;
 
@@ -12,7 +12,7 @@ export class CommandProcessor {
         this.sock = sock;
     }
 
-    public static register(command: string, executor: CommandExecutor) {
+    public register(command: string, executor: CommandExecutor) {
         this.commands.set(command, executor);
     }
 
@@ -34,16 +34,16 @@ export class CommandProcessor {
             const args = text.trim().split(/\s+/);
             const commandName = args[1]?.toLowerCase(); //Modelo: @Bot status
 
-            if (commandName && CommandProcessor.commands.has(commandName)) {
+            if (commandName && this.commands.has(commandName)) {
 
-                const executor = CommandProcessor.commands.get(commandName);
+                const executor = this.commands.get(commandName);
 
                 if (executor) {
                     try {
                         console.log(`Comando ${commandName.toUpperCase()} adicionado sendo executado!`)
                         await executor.execute(message);
                     } catch(err) {
-                        console.log(err)
+                        console.log("Erro ao processar comando(5)" + err)
                     }
                 }
             } else {

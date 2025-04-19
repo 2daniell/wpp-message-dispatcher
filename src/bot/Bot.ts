@@ -33,9 +33,7 @@ export class Bot extends EventEmitter {
 
         const { state, saveCreds } = await useSQLiteAuth(this.instanceName)
 
-        const logger = Pino({
-            level: "silent"
-          });
+        const logger = Pino({ level: "silent" });
 
         this.sock = makeWASocket({
             auth: state,

@@ -18,9 +18,11 @@ export class BotManager {
         if (this.bots.has(instanceName)) return;
 
         const bot = new Bot(instanceName, onQr, onReady)
-        this.bots.set(instanceName, bot);
-        this.db.run('INSERT OR IGNORE INTO bots (name) VALUES (?)', [instanceName]);
+        BotManager.bots.set(instanceName, bot);
+        BotManager.db.run('INSERT OR IGNORE INTO bots (name) VALUES (?)', [instanceName]);
         await bot.start()
+
+        console.log(BotManager.bots)
 
         bot.on('statusChanged', (newStatus) => {
             BotManager.win?.webContents.send('update-status', {
@@ -32,10 +34,10 @@ export class BotManager {
 
     public static async initDatabase() {
         return new Promise<void>((resolve, reject) => {
-            this.db = new Database('./bots.db', (err) => {
+            BotManager.db = new Database('./bots.db', (err) => {
                 if (err) return reject(err);
     
-                this.db.run('CREATE TABLE IF NOT EXISTS bots (name TEXT PRIMARY KEY)', (err2) => {
+                BotManager.db.run('CREATE TABLE IF NOT EXISTS bots (name TEXT PRIMARY KEY)', (err2) => {
                     if (err2) return reject(err2);
                     resolve();
                 });

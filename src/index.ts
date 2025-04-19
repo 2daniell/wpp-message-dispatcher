@@ -21,6 +21,8 @@ function createWindow() {
     
     Menu.setApplicationMenu(null)
     win.loadFile(path.join(__dirname, 'ui', 'index.html'));
+
+    //win.webContents.openDevTools();
     
     win.on('closed', () => {
       win = null;

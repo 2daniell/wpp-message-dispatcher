@@ -17,10 +17,11 @@ export class StatusCommand implements CommandExecutor {
 
             const jid = message.key.remoteJid!;
 
+            console.log("ENVIANDO")
             await this.sock.sendMessage(jid, {
                 text: "✅ Bot online e funcionando!",
             }, { quoted: message })
-
+            console.log("ENVIADO")
         } catch(err) {
             console.error("Erro ao executar comando status:", err);
         }

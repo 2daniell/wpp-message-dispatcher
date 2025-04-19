@@ -17,8 +17,8 @@ export class BotHandler {
         this.bot = bot
 
         this.commandProcessor = new CommandProcessor(this.bot.getSock());
-        CommandProcessor.register("status", new StatusCommand(this.bot.getSock()));
-        CommandProcessor.register("disparar", new DispatchCommand(bot));
+        this.commandProcessor.register("status", new StatusCommand(this.bot.getSock()));
+        this.commandProcessor.register("disparar", new DispatchCommand(bot));
 
         this.eventProcessor = new EventProcessor(this.bot.getSock());
         this.eventProcessor.register("message", new MessageListener(bot))

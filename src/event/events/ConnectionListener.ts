@@ -41,7 +41,7 @@ export class ConnectionListener implements Listener<any> {
             }
             
             this.bot.setStatus(BotStatus.STARTING)
-            await sleep(1000 * 60 * 5)
+            //await sleep(1000 * 60 * 5)
 
             const botNumber = this.bot.getSock().user.id.split(":")[0]
 

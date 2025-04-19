@@ -31,9 +31,10 @@ export class MessageListener implements Listener<any[]> {
             const mentions = message.message?.extendedTextMessage?.contextInfo?.mentionedJid;
             const botJid = this.bot.getSock().user.id;
 
-            const botPhoneNumber = botJid?.split(':')[0];
+            const botPhoneNumber = botJid?.match(/^(\d{8,15})/)?.[1];
+
             const mentionedBot = mentions?.some(mention => {
-                const mentionPhoneNumber = mention.replace(/[^0-9]/g, '');
+                const mentionPhoneNumber = mention.match(/^(\d{8,15})/)?.[1];
                 return mentionPhoneNumber === botPhoneNumber;
             });
 
